@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-username/argocd-demo
+    targetRevision: HEAD
+    path: helm-charts/my-app
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: environment
+          value: "prod"
+        - name: replicaCount
+          value: "3"
+        - name: image.tag
+          value: "v1.0.0"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: my-app-prod
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    # Note: No automated sync in production for safety
